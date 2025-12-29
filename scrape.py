@@ -23,7 +23,8 @@ from os.path import join, isdir, exists
 import time
 import numpy as np
 from random import randint
-from hashlib import sha1
+from hashlib import sha256  # Changed from sha1 to sha256
+import requests  # Added import for requests library
 
 AZLYRICS_URL = 'http://www.azlyrics.com/t/taylorswift.html'
 CACHE_DIR = 'html/'
@@ -100,10 +101,10 @@ class LyricsWalker(object):
 
     @classmethod
     def get_soup_from_url(cls, url, html=False):
-        urlobject = urllib.urlopen(url)
+        response = requests.get(url)  # Changed from urllib.urlopen to requests.get
         time.sleep(randint(5, 30))
         print 'Read %s' % url
-        full_html = urlobject.read()
+        full_html = response.text.encode('utf-8')  # Ensure encoding compatibility
 
         if html:
             return bs4.BeautifulSoup(full_html, "html.parser"), full_html
@@ -112,9 +113,9 @@ class LyricsWalker(object):
     @classmethod
     def url_to_filename(cls, url):
         """
-        Make a URL into a file name, using SHA1 hashes.
+        Make a URL into a file name, using SHA256 hashes.
         """
-        hash_file = sha1(url).hexdigest() + '.html'
+        hash_file = sha256(url.encode('utf-8')).hexdigest() + '.html'  # Changed from sha1 to sha256
         return join(CACHE_DIR, hash_file)
 
     @classmethod
